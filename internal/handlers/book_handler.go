@@ -171,11 +171,34 @@ func (h *BookCommandHandler) generateChapterOutlines(bookPath string, bookState 
 		}
 
 		chapterState.Generated = true
-		for j, section := range chapterOutline.Sections {
-			chapterState.Sections[j].Title = section.Title
+
+		// Initialize sections and subsections if they are not already initialized
+		if len(chapterState.Sections) < len(chapterOutline.Sections) {
+			for len(chapterState.Sections) < len(chapterOutline.Sections) {
+				chapterState.Sections = append(chapterState.Sections, state.SectionState{})
+			}
+		}
+
+		// Ensure section and subsection lengths match before assignment
+		for j := range chapterOutline.Sections {
+			if j >= len(chapterState.Sections) {
+				h.ErrorHandler.LogError(fmt.Errorf("section index out of range: %d", j))
+				return fmt.Errorf("section index out of range: %d", j)
+			}
+			chapterState.Sections[j].Title = chapterOutline.Sections[j].Title
 			chapterState.Sections[j].Generated = true
-			for k, subsection := range section.Subsections {
-				chapterState.Sections[j].Subsections[k].Title = subsection.Title
+
+			if len(chapterState.Sections[j].Subsections) < len(chapterOutline.Sections[j].Subsections) {
+				for len(chapterState.Sections[j].Subsections) < len(chapterOutline.Sections[j].Subsections) {
+					chapterState.Sections[j].Subsections = append(chapterState.Sections[j].Subsections, state.SubsectionState{})
+				}
+			}
+
+			for k := range chapterOutline.Sections[j].Subsections {
+				if k >= len(chapterState.Sections[j].Subsections) {
+					chapterState.Sections[j].Subsections = append(chapterState.Sections[j].Subsections, state.SubsectionState{})
+				}
+				chapterState.Sections[j].Subsections[k].Title = chapterOutline.Sections[j].Subsections[k].Title
 				chapterState.Sections[j].Subsections[k].Generated = true
 			}
 		}
