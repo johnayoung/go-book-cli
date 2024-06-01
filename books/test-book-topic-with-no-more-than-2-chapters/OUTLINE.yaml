@@ -1,0 +1,11 @@
+title: Test book topic with no more than 2 chapters
+chapters:
+- title: 'Chapter 1: Introduction'
+  sections:
+  - title: 'Section 1.1: Overview of the Test Subject'
+  - title: 'Section 1.2: Importance of Testing'
+  - title: 'Section 1.3: Common Tests Performed'
+- title: 'Chapter 2: Setting Up Testing Environments'
+  sections:
+  - title: 'Section 2.1: Preparing Tests'
+  - title: 'Section 2.2: Validating Results'

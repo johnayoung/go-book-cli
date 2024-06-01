@@ -1,15 +1,26 @@
 package state
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
+type SectionState struct {
+	Title     string `yaml:"title"`
+	Generated bool   `yaml:"generated"`
+}
+
+type ChapterState struct {
+	Title    string         `yaml:"title"`
+	Sections []SectionState `yaml:"sections"`
+}
+
 type State struct {
-	OutlineGenerated bool `json:"outline_generated"`
-	// Add more fields as needed to track progress
+	OutlineGenerated bool           `yaml:"outlineGenerated"`
+	Chapters         []ChapterState `yaml:"chapters"`
 }
 
 func NewState() *State {
@@ -17,12 +28,12 @@ func NewState() *State {
 }
 
 func (s *State) Save(path string) error {
-	data, err := json.MarshalIndent(s, "", "  ")
+	data, err := yaml.Marshal(s)
 	if err != nil {
 		return fmt.Errorf("failed to marshal state: %w", err)
 	}
 
-	err = os.WriteFile(filepath.Join(path, "state.json"), data, 0644)
+	err = os.WriteFile(filepath.Join(path, "state.yaml"), data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to save state file: %w", err)
 	}
@@ -31,7 +42,7 @@ func (s *State) Save(path string) error {
 }
 
 func LoadState(path string) (*State, error) {
-	data, err := os.ReadFile(filepath.Join(path, "state.json"))
+	data, err := os.ReadFile(filepath.Join(path, "state.yaml"))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return NewState(), nil
@@ -40,7 +51,7 @@ func LoadState(path string) (*State, error) {
 	}
 
 	var state State
-	err = json.Unmarshal(data, &state)
+	err = yaml.Unmarshal(data, &state)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal state: %w", err)
 	}
