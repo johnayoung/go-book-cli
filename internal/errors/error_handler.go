@@ -51,7 +51,7 @@ func (eh *ErrorHandler) exponentialBackoff(attempt int) time.Duration {
 }
 
 func (eh *ErrorHandler) IsNetworkError(err error) bool {
-	if err, ok := err.(*url.Error); ok {
+	if _, ok := err.(*url.Error); ok {
 		return true
 	}
 	return false

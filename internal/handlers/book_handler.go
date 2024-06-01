@@ -10,6 +10,7 @@ import (
 	"go-book-ai/internal/file"
 )
 
+// BookCommandHandler handles book-related commands.
 type BookCommandHandler struct {
 	WritingAgent   agents.WritingAgent
 	ReviewingAgent agents.ReviewingAgent
@@ -17,6 +18,7 @@ type BookCommandHandler struct {
 	ErrorHandler   *errors.ErrorHandler
 }
 
+// NewBookCommandHandler returns a new BookCommandHandler.
 func NewBookCommandHandler(writingAgent agents.WritingAgent, reviewingAgent agents.ReviewingAgent, fm *file.FileManager, eh *errors.ErrorHandler) *BookCommandHandler {
 	return &BookCommandHandler{WritingAgent: writingAgent, ReviewingAgent: reviewingAgent, FileManager: fm, ErrorHandler: eh}
 }
