@@ -9,16 +9,18 @@ import (
 	"go-book-ai/internal/errors"
 	"go-book-ai/internal/file"
 	"go-book-ai/internal/handlers"
+	"go-book-ai/internal/logger"
 	"go-book-ai/internal/models"
 
 	"github.com/spf13/cobra"
 )
 
-var newCmd = &cobra.Command{
-	Use:   "new [topic]",
-	Short: "Create a new book with the specified topic",
-	Long:  `Create a new book and generate an outline based on the specified topic.`,
-	Args:  cobra.ExactArgs(1),
+var bookCmd = &cobra.Command{
+	Use:   "book [topic]",
+	Short: "Create or continue a book with the specified topic",
+	Long: `Create a new book or continue an existing book by specifying the book topic.
+If a book with the given topic already exists, the command will pick up where it left off.`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		topic := args[0]
 
@@ -33,18 +35,19 @@ var newCmd = &cobra.Command{
 		reviewingAgent := agents.NewMockReviewingAgent()
 		fileManager := file.NewFileManager()
 		errorHandler := errors.NewErrorHandler(3)
-		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler)
+		logger := logger.NewSimpleLogger()
+		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler, logger)
 
-		log.Printf("Starting to create a new book with topic: %s", topic)
-		err := bookHandler.CreateNewBook(topic)
+		log.Printf("Starting process for book with topic: %s", topic)
+		err := bookHandler.ProcessBook(topic)
 		if err != nil {
-			log.Printf("Failed to create new book: %v", err)
-			fmt.Fprintf(os.Stderr, "Failed to create new book: %v\n", err)
+			log.Printf("Failed to process book: %v", err)
+			fmt.Fprintf(os.Stderr, "Failed to process book: %v\n", err)
 			os.Exit(1)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(bookCmd)
 }

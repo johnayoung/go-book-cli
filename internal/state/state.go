@@ -8,14 +8,21 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type SectionState struct {
+type SubsectionState struct {
 	Title     string `yaml:"title"`
 	Generated bool   `yaml:"generated"`
 }
 
+type SectionState struct {
+	Title       string            `yaml:"title"`
+	Generated   bool              `yaml:"generated"`
+	Subsections []SubsectionState `yaml:"subsections"`
+}
+
 type ChapterState struct {
-	Title    string         `yaml:"title"`
-	Sections []SectionState `yaml:"sections"`
+	Title     string         `yaml:"title"`
+	Generated bool           `yaml:"generated"`
+	Sections  []SectionState `yaml:"sections"`
 }
 
 type State struct {

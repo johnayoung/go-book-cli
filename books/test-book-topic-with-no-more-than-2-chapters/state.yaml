@@ -1,2 +1,8 @@
 outlineGenerated: true
-chapters: []
+chapters:
+- title: 'Chapter 1: Introduction'
+  generated: true
+  sections: []
+- title: 'Chapter 2: Literature Review'
+  generated: true
+  sections: []

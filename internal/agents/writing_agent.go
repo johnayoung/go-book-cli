@@ -21,40 +21,53 @@ func NewWritingAgent(model models.LanguageModel) WritingAgent {
 
 func (agent *writingAgent) GenerateOutline(topic string) (string, error) {
 	prompt := fmt.Sprintf(`Generate a detailed book outline for a book titled "%s". 
-The outline should include multiple chapters, each with several sections, formatted in YAML as follows:
+The outline should include multiple chapters, each with several sections, formatted strictly in YAML as follows:
 
 title: "%s"
 chapters:
-  - title: "Chapter 1"
+  - title: "Chapter 1: [Chapter Title]"
     sections:
-      - title: "Section 1.1"
-      - title: "Section 1.2"
-  - title: "Chapter 2"
+      - title: "[Section Title]"
+      - title: "[Section Title]"
+  - title: "Chapter 2: [Chapter Title]"
     sections:
-      - title: "Section 2.1"
-      - title: "Section 2.2"
+      - title: "[Section Title]"
+      - title: "[Section Title]"
   ...
-  - title: "Chapter N"
+  - title: "Chapter N: [Chapter Title]"
     sections:
-      - title: "Section N.1"
-      - title: "Section N.2"
+      - title: "[Section Title]"
+      - title: "[Section Title]"
 
-Please ensure the output is valid YAML.`, topic, topic)
+Please ensure the output is valid YAML and do not include any additional text or explanations.`, topic, topic)
 	return agent.LanguageModel.Generate(prompt)
 }
 
 func (agent *writingAgent) GenerateChapterOutline(chapterTitle string) (string, error) {
 	prompt := fmt.Sprintf(`Generate a detailed chapter outline for a chapter titled "%s". 
-The outline should include multiple sections, formatted in YAML as follows:
+The outline should include sections and sub-sections, each with a brief description, formatted strictly in YAML as follows:
 
 title: "%s"
 sections:
-  - title: "Section 1"
-  - title: "Section 2"
+  - title: "[Section Title]"
+    description: "[Brief description of Section]"
+    subsections:
+      - title: "[Subsection Title]"
+        description: "[Brief description of Subsection]"
+      - title: "[Subsection Title]"
+        description: "[Brief description of Subsection]"
+  - title: "[Section Title]"
+    description: "[Brief description of Section]"
   ...
-  - title: "Section N"
+  - title: "[Section Title]"
+    description: "[Brief description of Section]"
+    subsections:
+      - title: "[Subsection Title]"
+        description: "[Brief description of Subsection]"
+      - title: "[Subsection Title]"
+        description: "[Brief description of Subsection]"
 
-Please ensure the output is valid YAML.`, chapterTitle, chapterTitle)
+Please ensure the output is valid YAML and do not include any additional text or explanations.`, chapterTitle, chapterTitle)
 	return agent.LanguageModel.Generate(prompt)
 }
 
