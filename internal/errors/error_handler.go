@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"log"
 	"math"
 	"math/rand"
@@ -51,10 +52,8 @@ func (eh *ErrorHandler) exponentialBackoff(attempt int) time.Duration {
 }
 
 func (eh *ErrorHandler) IsNetworkError(err error) bool {
-	if _, ok := err.(*url.Error); ok {
-		return true
-	}
-	return false
+	var urlErr *url.Error
+	return errors.As(err, &urlErr)
 }
 
 func (eh *ErrorHandler) IsRateLimitError(resp *http.Response) bool {

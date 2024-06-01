@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"go-book-ai/internal/agents"
@@ -34,8 +35,10 @@ var continueCmd = &cobra.Command{
 		errorHandler := errors.NewErrorHandler(3)
 		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler)
 
+		log.Printf("Starting to continue the book with ID: %s", bookID)
 		err := bookHandler.ContinueExistingBook(bookID)
 		if err != nil {
+			log.Printf("Failed to continue book: %v", err)
 			fmt.Fprintf(os.Stderr, "Failed to continue book: %v\n", err)
 			os.Exit(1)
 		}

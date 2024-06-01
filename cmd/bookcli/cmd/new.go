@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"go-book-ai/internal/agents"
@@ -34,8 +35,10 @@ var newCmd = &cobra.Command{
 		errorHandler := errors.NewErrorHandler(3)
 		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler)
 
+		log.Printf("Starting to create a new book with topic: %s", topic)
 		err := bookHandler.CreateNewBook(topic)
 		if err != nil {
+			log.Printf("Failed to create new book: %v", err)
 			fmt.Fprintf(os.Stderr, "Failed to create new book: %v\n", err)
 			os.Exit(1)
 		}
