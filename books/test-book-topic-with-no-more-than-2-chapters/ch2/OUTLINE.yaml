@@ -1,11 +1,44 @@
 title: 'Chapter 2: Literature Review'
 sections:
-- title: 'Section 1: Overview of Theoretical Frameworks'
-- title: 'Section 2: Historical Context of the Study'
-- title: 'Section 3: Relevant Models and Approaches'
-- title: 'Section 4: Key Concepts and Definitions'
-- title: 'Section 5: Previous Research and Findings'
-- title: 'Section 6: Critical Analysis of Related Literature'
-- title: 'Section 7: Gaps in Existing Literature'
-- title: 'Section 8: Contribution of the Present Study'
-- title: 'Section 9: Summary of the Literature Review'
+- title: Overview
+  description: A brief introduction to the literature review process and its significance
+    within the research project.
+  subsections:
+  - title: Purpose of Literature Review
+    description: Outline the main objectives of an effective literature review.
+  - title: Approach to Literature Review
+    description: Discussion of common methods used in identifying, analyzing, and
+      synthesizing relevant literature.
+- title: Theoretical Literature
+  description: Discussion of the theoretical foundations of the research topic.
+  subsections:
+  - title: Critical Theories
+    description: Review of established theories relevant to the research topic.
+  - title: Analytical Framework
+    description: Discussion of the conceptual lens used to analyze the research problem.
+- title: Empirical Literature
+  description: Review of previous empirical studies related to the research question.
+  subsections:
+  - title: Primary Studies
+    description: Assessment of original research studies or first-hand experiences
+      on the topic.
+  - title: Secondary Studies
+    description: Review of interpretations or analyses derived from primary research.
+- title: Synthesis of Literature
+  description: Integration and interpretation of the research findings from theoretical
+    and empirical literature.
+  subsections:
+  - title: Thematic Analysis
+    description: Identification and discussion of common themes in the literature.
+  - title: Gap Analysis
+    description: Discussion on identified knowledge gaps within the literature.
+- title: Summary and Conclusions
+  description: Provides an overview of the findings and conclusions from the literature
+    review, highlighting the main themes and gaps that the research proposal will
+    aim to address.
+  subsections:
+  - title: Capturing Findings
+    description: Summary of the key findings and debates from the literature review.
+  - title: Future Directions
+    description: Outline of the proposed research direction based on the gaps identified
+      in the literature review.
