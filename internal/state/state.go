@@ -1,12 +1,9 @@
 package state
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-
-	"gopkg.in/yaml.v2"
-)
+type Message struct {
+	Role    string `yaml:"role"`
+	Content string `yaml:"content"`
+}
 
 type SubsectionState struct {
 	Title string `yaml:"title"`
@@ -29,40 +26,24 @@ type ChapterState struct {
 type State struct {
 	OutlineGenerated bool           `yaml:"outline_generated"`
 	Chapters         []ChapterState `yaml:"chapters"`
+	MessageHistory   []Message      `yaml:"message_history"`
 }
 
 func NewState() *State {
-	return &State{}
+	return &State{
+		OutlineGenerated: false,
+		Chapters:         []ChapterState{},
+		MessageHistory:   []Message{},
+	}
 }
 
-func (s *State) Save(path string) error {
-	data, err := yaml.Marshal(s)
-	if err != nil {
-		return fmt.Errorf("failed to marshal state: %w", err)
-	}
-
-	err = os.WriteFile(filepath.Join(path, "state.yaml"), data, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to save state file: %w", err)
-	}
-
-	return nil
-}
-
-func LoadState(path string) (*State, error) {
-	data, err := os.ReadFile(filepath.Join(path, "state.yaml"))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return NewState(), nil
+func GetContext(history []Message) []map[string]string {
+	context := make([]map[string]string, len(history))
+	for i, msg := range history {
+		context[i] = map[string]string{
+			"role":    msg.Role,
+			"content": msg.Content,
 		}
-		return nil, fmt.Errorf("failed to read state file: %w", err)
 	}
-
-	var state State
-	err = yaml.Unmarshal(data, &state)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal state: %w", err)
-	}
-
-	return &state, nil
+	return context
 }

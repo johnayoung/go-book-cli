@@ -8,9 +8,11 @@ import (
 	"go-book-ai/internal/handlers"
 	"go-book-ai/internal/logger"
 	"go-book-ai/internal/models"
+	"go-book-ai/internal/state"
 	"go-book-ai/internal/utils"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -36,18 +38,30 @@ If a book with the given topic already exists, the command will pick up where it
 		errorHandler := errors.NewErrorHandler(3)
 		fileManager := file.NewFileManager()
 
-		// Load existing conversation history if available
-		var history models.ConversationHistory
-		historyPath := fmt.Sprintf("books/%s/history.json", cleanedTopic)
-		err := fileManager.LoadHistoryFromFile(historyPath, &history)
+		// Create the book directory if it does not exist
+		bookPath := filepath.Join("books", cleanedTopic)
+		err := os.MkdirAll(bookPath, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Failed to create book directory: %v", err)
+		}
+
+		stateFilePath := filepath.Join(bookPath, "state.yaml")
+
+		// Load or create state
+		bookState, err := fileManager.LoadState(stateFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				history = models.StartNewConversation(topic)
+				bookState = state.NewState()
+				err = fileManager.SaveState(stateFilePath, bookState)
+				if err != nil {
+					log.Fatalf("Failed to create state file: %v", err)
+				}
 			} else {
-				log.Fatalf("Failed to load conversation history: %v", err)
+				log.Fatalf("Failed to load state: %v", err)
 			}
 		}
 
+		// Initialize agents and handlers
 		chatGPTModel := models.NewChatGPTModel(errorHandler)
 		writingAgent := agents.NewWritingAgent(chatGPTModel)
 		reviewingAgent := agents.NewMockReviewingAgent()
@@ -62,10 +76,10 @@ If a book with the given topic already exists, the command will pick up where it
 			os.Exit(1)
 		}
 
-		// Save the updated conversation history
-		err = fileManager.SaveHistoryToFile(history, historyPath)
+		// Save the updated state
+		err = fileManager.SaveState(stateFilePath, bookState)
 		if err != nil {
-			log.Fatalf("Failed to save conversation history: %v", err)
+			log.Fatalf("Failed to save state: %v", err)
 		}
 	},
 }

@@ -5,13 +5,16 @@ import (
 	"go-book-ai/internal/file"
 	"go-book-ai/internal/models"
 	"go-book-ai/internal/outline"
+	"go-book-ai/internal/state"
+	"go-book-ai/internal/utils"
+	"path/filepath"
 )
 
 type WritingAgent interface {
 	GenerateOutline(topic string) (string, error)
 	GenerateChapterOutline(chapterTitle string) (string, error)
 	GenerateSectionContent(section outline.Section) (string, error)
-	SendMessage(history *models.ConversationHistory, fileManager *file.FileManager, historyPath string, excludeContent bool) (string, error)
+	SendMessage(history *[]state.Message, fileManager *file.FileManager, excludeContent bool) (string, error)
 }
 
 type writingAgent struct {
@@ -95,31 +98,35 @@ Make sure the content is engaging, informative, and suitable for a book. Write i
 	return prompt, nil
 }
 
-func (agent *writingAgent) SendMessage(history *models.ConversationHistory, fileManager *file.FileManager, historyPath string, excludeContent bool) (string, error) {
-	if history == nil || len(history.Messages) == 0 {
+func (agent *writingAgent) SendMessage(history *[]state.Message, fileManager *file.FileManager, excludeContent bool) (string, error) {
+	if history == nil || len(*history) == 0 {
 		return "", fmt.Errorf("conversation history is empty")
 	}
 
 	agent.LanguageModel.SetParameters(map[string]interface{}{
-		"messages": history.GetContext(),
+		"messages": state.GetContext(*history),
 	})
 
-	content, err := agent.LanguageModel.Generate(history.Messages[len(history.Messages)-1].Content)
+	content, err := agent.LanguageModel.Generate((*history)[len(*history)-1].Content)
 	if err != nil {
 		return "", err
 	}
 
 	if !excludeContent {
-		history.AddMessage("assistant", content)
+		*history = append(*history, state.Message{Role: "assistant", Content: content})
 	} else {
 		// Only add a reference message to history
-		history.AddMessage("assistant", fmt.Sprintf("Content generated for section, saved to file."))
+		*history = append(*history, state.Message{Role: "assistant", Content: "Content generated for section, saved to file."})
 	}
 
-	// Save history after each successful request
-	err = fileManager.SaveHistoryToFile(*history, historyPath)
+	// Save state after each successful message
+	bookTopic := (*history)[0].Content
+	cleanedTopic := utils.CleanName(bookTopic)
+	stateFilePath := filepath.Join("books", cleanedTopic, "state.yaml")
+
+	err = fileManager.SaveState(stateFilePath, &state.State{MessageHistory: *history})
 	if err != nil {
-		return "", fmt.Errorf("failed to save conversation history: %w", err)
+		return "", fmt.Errorf("failed to save state: %w", err)
 	}
 
 	return content, nil
