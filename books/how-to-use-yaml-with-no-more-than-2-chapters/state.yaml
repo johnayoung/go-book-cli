@@ -1,0 +1,58 @@
+outline_generated: true
+chapters:
+- title: 'Chapter 1: Introduction to YAML'
+  outline_generated: true
+  draft_generated: false
+  sections:
+  - title: Understanding YAML
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: History of YAML
+    - title: What is YAML?
+  - title: The Importance of YAML
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: Common Uses of YAML
+    - title: Benefits of using YAML
+  - title: Components of a YAML File
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: Understanding YAML (Syntax, Lists, sequence, mapping)
+    - title: Structure of a YAML file
+  - title: YAML vs JSON vs XML
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: Comparing Syntax
+    - title: Use Cases
+- title: 'Chapter 2: Working with YAML'
+  outline_generated: true
+  draft_generated: false
+  sections:
+  - title: Creating a YAML file
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: YAML file setup
+    - title: Writing data in YAML
+  - title: Reading a YAML file
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: Parsing YAML
+    - title: Converting YAML to other formats
+  - title: Parsing YAML files
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: Understanding the Parser
+    - title: Building a YAML Parser
+  - title: Validating YAML syntax
+    outline_generated: true
+    draft_generated: true
+    subsections:
+    - title: Understanding YAML syntax checks
+    - title: Using a YAML validator

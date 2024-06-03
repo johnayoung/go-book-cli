@@ -9,24 +9,25 @@ import (
 )
 
 type SubsectionState struct {
-	Title     string `yaml:"title"`
-	Generated bool   `yaml:"generated"`
+	Title string `yaml:"title"`
 }
 
 type SectionState struct {
-	Title       string            `yaml:"title"`
-	Generated   bool              `yaml:"generated"`
-	Subsections []SubsectionState `yaml:"subsections"`
+	Title            string            `yaml:"title"`
+	OutlineGenerated bool              `yaml:"outline_generated"`
+	DraftGenerated   bool              `yaml:"draft_generated"`
+	Subsections      []SubsectionState `yaml:"subsections"`
 }
 
 type ChapterState struct {
-	Title     string         `yaml:"title"`
-	Generated bool           `yaml:"generated"`
-	Sections  []SectionState `yaml:"sections"`
+	Title            string         `yaml:"title"`
+	OutlineGenerated bool           `yaml:"outline_generated"`
+	DraftGenerated   bool           `yaml:"draft_generated"`
+	Sections         []SectionState `yaml:"sections"`
 }
 
 type State struct {
-	OutlineGenerated bool           `yaml:"outlineGenerated"`
+	OutlineGenerated bool           `yaml:"outline_generated"`
 	Chapters         []ChapterState `yaml:"chapters"`
 }
 

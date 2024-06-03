@@ -1,0 +1,30 @@
+title: 'Chapter 2: Working with YAML'
+sections:
+- title: Creating a YAML file
+  description: Step by step guide to create a YAML file
+  subsections:
+  - title: YAML file setup
+    description: Setting up the environment to create a YAML file
+  - title: Writing data in YAML
+    description: Discussion on how to write data into a YAML file
+- title: Reading a YAML file
+  description: Steps to read data from a YAML file
+  subsections:
+  - title: Parsing YAML
+    description: Process of parsing a YAML file to read data
+  - title: Converting YAML to other formats
+    description: How to convert YAML data into other formats like JSON and XML
+- title: Parsing YAML files
+  description: Deep dive into the parsing process and its relevance
+  subsections:
+  - title: Understanding the Parser
+    description: How a YAML parser works and its significance
+  - title: Building a YAML Parser
+    description: Guide on how to build a custom YAML parser
+- title: Validating YAML syntax
+  description: The process of validating the syntax of a YAML file
+  subsections:
+  - title: Understanding YAML syntax checks
+    description: Explanation of YAML syntax checking and why it's necessary
+  - title: Using a YAML validator
+    description: Guide on how to use a YAML validator for syntax verification

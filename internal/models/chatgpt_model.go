@@ -4,63 +4,93 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go-book-ai/internal/errors"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 type ChatGPTModel struct {
-	APIKey string
-	Params map[string]interface{}
+	Parameters   map[string]interface{}
+	ErrorHandler *errors.ErrorHandler
 }
 
-func NewChatGPTModel(apiKey string) *ChatGPTModel {
-	return &ChatGPTModel{APIKey: apiKey, Params: make(map[string]interface{})}
+func NewChatGPTModel(errorHandler *errors.ErrorHandler) *ChatGPTModel {
+	return &ChatGPTModel{ErrorHandler: errorHandler}
 }
 
-func (model *ChatGPTModel) SetParameters(params map[string]interface{}) {
-	model.Params = params
+func (model *ChatGPTModel) SetParameters(params map[string]interface{}) error {
+	model.Parameters = params
+	return nil
 }
 
 func (model *ChatGPTModel) Generate(prompt string) (string, error) {
-	url := "https://api.openai.com/v1/chat/completions"
-	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model": "gpt-4", // Use the appropriate model name
-		"messages": []map[string]string{
-			{"role": "user", "content": prompt},
-		},
-	})
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		return "", fmt.Errorf("API key not set. Please set the OPENAI_API_KEY environment variable.")
+	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	url := "https://api.openai.com/v1/chat/completions"
+	body := map[string]interface{}{
+		"model":    "gpt-4",
+		"messages": model.Parameters["messages"],
+	}
+
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request body: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", model.APIKey))
 
-	client := &http.Client{Timeout: time.Second * 30}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
+	client := &http.Client{Timeout: 60 * time.Second}
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to generate content: %s", resp.Status)
-	}
-
-	var response map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	if choices, ok := response["choices"].([]interface{}); ok && len(choices) > 0 {
-		if message, ok := choices[0].(map[string]interface{})["message"].(map[string]interface{}); ok {
-			if content, ok := message["content"].(string); ok {
-				return content, nil
-			}
+	var resp *http.Response
+	for retries := 0; retries <= model.ErrorHandler.RetryLimit; retries++ {
+		resp, err = client.Do(req)
+		if err == nil {
+			break
+		}
+		model.ErrorHandler.LogError(fmt.Errorf("failed to execute request: %w", err))
+		if !model.ErrorHandler.HandleError(err) {
+			return "", fmt.Errorf("retry attempts exhausted")
 		}
 	}
 
-	return "", fmt.Errorf("unexpected response format")
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
+	if resp == nil || resp.StatusCode != http.StatusOK {
+		responseBody, _ := io.ReadAll(resp.Body)
+		log.Printf("Request body: %s", jsonBody)
+		return "", fmt.Errorf("API request failed with status: %s, response: %s", resp.Status, string(responseBody))
+	}
+
+	var respBody struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&respBody)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode response body: %w", err)
+	}
+
+	if len(respBody.Choices) == 0 {
+		return "", fmt.Errorf("no choices in response body")
+	}
+
+	return respBody.Choices[0].Message.Content, nil
 }

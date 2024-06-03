@@ -1,0 +1,33 @@
+title: 'Chapter 1: Introduction to YAML'
+sections:
+- title: Understanding YAML
+  description: An overview of YAML and its uses
+  subsections:
+  - title: History of YAML
+    description: Exploring the origins and evolution of YAML
+  - title: What is YAML?
+    description: Definition and purpose of YAML
+- title: The Importance of YAML
+  description: Exploring why YAML is an essential data serialization standard
+  subsections:
+  - title: Common Uses of YAML
+    description: Exploring real-world applications where YAML is used
+  - title: Benefits of using YAML
+    description: Explaining the advantages of using YAML for data representation
+- title: Components of a YAML File
+  description: Introduction to the syntax and structure of a YAML file
+  subsections:
+  - title: Understanding YAML (Syntax, Lists, sequence, mapping)
+    description: Detailed explanation of YAML Syntax and it's components like lists,
+      sequences and mappings
+  - title: Structure of a YAML file
+    description: Deep dive into the structure and organization of data within a YAML
+      file
+- title: YAML vs JSON vs XML
+  description: Comparing YAML with JSON and XML data representation formats
+  subsections:
+  - title: Comparing Syntax
+    description: Contrasting the syntax differences between YAML, JSON, and XML
+  - title: Use Cases
+    description: Comparing the optimal contexts and use cases for each of YAML, JSON,
+      and XML

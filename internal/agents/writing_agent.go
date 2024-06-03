@@ -2,13 +2,16 @@ package agents
 
 import (
 	"fmt"
+	"go-book-ai/internal/file"
 	"go-book-ai/internal/models"
+	"go-book-ai/internal/outline"
 )
 
 type WritingAgent interface {
 	GenerateOutline(topic string) (string, error)
 	GenerateChapterOutline(chapterTitle string) (string, error)
-	GenerateSectionContent(sectionTitle string) (string, error)
+	GenerateSectionContent(section outline.Section) (string, error)
+	SendMessage(history *models.ConversationHistory, fileManager *file.FileManager, historyPath string, excludeContent bool) (string, error)
 }
 
 type writingAgent struct {
@@ -40,7 +43,7 @@ chapters:
       - title: "[Section Title]"
 
 Please ensure the output is valid YAML and do not include any additional text or explanations.`, topic, topic)
-	return agent.LanguageModel.Generate(prompt)
+	return prompt, nil
 }
 
 func (agent *writingAgent) GenerateChapterOutline(chapterTitle string) (string, error) {
@@ -68,10 +71,56 @@ sections:
         description: "[Brief description of Subsection]"
 
 Please ensure the output is valid YAML and do not include any additional text or explanations.`, chapterTitle, chapterTitle)
-	return agent.LanguageModel.Generate(prompt)
+	return prompt, nil
 }
 
-func (agent *writingAgent) GenerateSectionContent(sectionTitle string) (string, error) {
-	prompt := fmt.Sprintf(`Write detailed content for the section titled "%s".`, sectionTitle)
-	return agent.LanguageModel.Generate(prompt)
+func (agent *writingAgent) GenerateSectionContent(section outline.Section) (string, error) {
+	subsectionsPrompt := ""
+	for _, subsection := range section.Subsections {
+		subsectionsPrompt += fmt.Sprintf("\n- title: \"%s\"\n  description: \"[Detailed description of the subsection]\"", subsection.Title)
+	}
+
+	prompt := fmt.Sprintf(`You are writing a detailed section for a book. The section is titled "%s" and it contains the following subsections:
+%s
+
+Please write a comprehensive draft for this section in Markdown format. The content should include:
+
+1. An introduction that provides an overview of the section.
+2. Detailed explanations for each of the subsections listed, with clear and thorough descriptions.
+3. Practical examples or case studies where relevant.
+4. Conclusion that summarizes the key points covered in the section.
+
+Make sure the content is engaging, informative, and suitable for a book. Write in a clear and professional tone, and ensure the output is well-structured and coherent. Use markdown formatting including headings, subheadings, lists, code blocks, and other formatting features where appropriate.`, section.Title, subsectionsPrompt)
+
+	return prompt, nil
+}
+
+func (agent *writingAgent) SendMessage(history *models.ConversationHistory, fileManager *file.FileManager, historyPath string, excludeContent bool) (string, error) {
+	if history == nil || len(history.Messages) == 0 {
+		return "", fmt.Errorf("conversation history is empty")
+	}
+
+	agent.LanguageModel.SetParameters(map[string]interface{}{
+		"messages": history.GetContext(),
+	})
+
+	content, err := agent.LanguageModel.Generate(history.Messages[len(history.Messages)-1].Content)
+	if err != nil {
+		return "", err
+	}
+
+	if !excludeContent {
+		history.AddMessage("assistant", content)
+	} else {
+		// Only add a reference message to history
+		history.AddMessage("assistant", fmt.Sprintf("Content generated for section, saved to file."))
+	}
+
+	// Save history after each successful request
+	err = fileManager.SaveHistoryToFile(*history, historyPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to save conversation history: %w", err)
+	}
+
+	return content, nil
 }
