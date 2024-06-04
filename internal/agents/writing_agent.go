@@ -2,19 +2,15 @@ package agents
 
 import (
 	"fmt"
-	"go-book-ai/internal/file"
 	"go-book-ai/internal/models"
 	"go-book-ai/internal/outline"
-	"go-book-ai/internal/state"
-	"go-book-ai/internal/utils"
-	"path/filepath"
 )
 
 type WritingAgent interface {
 	GenerateOutline(topic string) (string, error)
 	GenerateChapterOutline(chapterTitle string) (string, error)
 	GenerateSectionContent(section outline.Section) (string, error)
-	SendMessage(history *[]state.Message, fileManager *file.FileManager, excludeContent bool) (string, error)
+	SendMessage(prompt string) (string, error)
 }
 
 type writingAgent struct {
@@ -80,54 +76,20 @@ Please ensure the output is valid YAML and do not include any additional text or
 func (agent *writingAgent) GenerateSectionContent(section outline.Section) (string, error) {
 	subsectionsPrompt := ""
 	for _, subsection := range section.Subsections {
-		subsectionsPrompt += fmt.Sprintf("\n- title: \"%s\"\n  description: \"[Detailed description of the subsection]\"", subsection.Title)
+		subsectionsPrompt += fmt.Sprintf("\n      - title: \"%s\"", subsection.Title)
 	}
 
-	prompt := fmt.Sprintf(`You are writing a detailed section for a book. The section is titled "%s" and it contains the following subsections:
-%s
-
-Please write a comprehensive draft for this section in Markdown format. The content should include:
-
-1. An introduction that provides an overview of the section.
-2. Detailed explanations for each of the subsections listed, with clear and thorough descriptions.
-3. Practical examples or case studies where relevant.
-4. Conclusion that summarizes the key points covered in the section.
-
-Make sure the content is engaging, informative, and suitable for a book. Write in a clear and professional tone, and ensure the output is well-structured and coherent. Use markdown formatting including headings, subheadings, lists, code blocks, and other formatting features where appropriate.`, section.Title, subsectionsPrompt)
+	prompt := fmt.Sprintf(`Write detailed content for the section titled "%s". 
+Subsections:%s`, section.Title, subsectionsPrompt)
 
 	return prompt, nil
 }
 
-func (agent *writingAgent) SendMessage(history *[]state.Message, fileManager *file.FileManager, excludeContent bool) (string, error) {
-	if history == nil || len(*history) == 0 {
-		return "", fmt.Errorf("conversation history is empty")
-	}
-
+func (agent *writingAgent) SendMessage(prompt string) (string, error) {
 	agent.LanguageModel.SetParameters(map[string]interface{}{
-		"messages": state.GetContext(*history),
+		"messages": []map[string]string{
+			{"role": "user", "content": prompt},
+		},
 	})
-
-	content, err := agent.LanguageModel.Generate((*history)[len(*history)-1].Content)
-	if err != nil {
-		return "", err
-	}
-
-	if !excludeContent {
-		*history = append(*history, state.Message{Role: "assistant", Content: content})
-	} else {
-		// Only add a reference message to history
-		*history = append(*history, state.Message{Role: "assistant", Content: "Content generated for section, saved to file."})
-	}
-
-	// Save state after each successful message
-	bookTopic := (*history)[0].Content
-	cleanedTopic := utils.CleanName(bookTopic)
-	stateFilePath := filepath.Join("books", cleanedTopic, "state.yaml")
-
-	err = fileManager.SaveState(stateFilePath, &state.State{MessageHistory: *history})
-	if err != nil {
-		return "", fmt.Errorf("failed to save state: %w", err)
-	}
-
-	return content, nil
+	return agent.LanguageModel.Generate(prompt)
 }

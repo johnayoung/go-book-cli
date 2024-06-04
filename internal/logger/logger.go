@@ -1,27 +1,35 @@
 package logger
 
-import "log"
+import (
+	"log"
+	"os"
+)
 
 type Logger interface {
 	Info(message string)
-	Warn(message string)
+	Debug(message string)
 	Error(message string)
 }
 
-type SimpleLogger struct{}
-
-func NewSimpleLogger() *SimpleLogger {
-	return &SimpleLogger{}
+type simpleLogger struct {
+	debugEnabled bool
 }
 
-func (l *SimpleLogger) Info(message string) {
-	log.Println("INFO: " + message)
+func NewSimpleLogger() Logger {
+	debugEnabled := os.Getenv("DEBUG") == "true"
+	return &simpleLogger{debugEnabled: debugEnabled}
 }
 
-func (l *SimpleLogger) Warn(message string) {
-	log.Println("WARN: " + message)
+func (l *simpleLogger) Info(message string) {
+	log.Printf("INFO: %s", message)
 }
 
-func (l *SimpleLogger) Error(message string) {
-	log.Println("ERROR: " + message)
+func (l *simpleLogger) Debug(message string) {
+	if l.debugEnabled {
+		log.Printf("DEBUG: %s", message)
+	}
+}
+
+func (l *simpleLogger) Error(message string) {
+	log.Printf("ERROR: %s", message)
 }

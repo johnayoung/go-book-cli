@@ -34,6 +34,12 @@ func (h *BookCommandHandler) ProcessBook(topic string) error {
 	bookPath := filepath.Join("books", folderName)
 	h.Logger.Info(fmt.Sprintf("Processing book folder: %s", bookPath))
 
+	// Ensure the book directory exists
+	err := os.MkdirAll(bookPath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to create book directory: %v", err)
+	}
+
 	stateFilePath := filepath.Join(bookPath, "state.yaml")
 
 	// Load state
@@ -41,12 +47,16 @@ func (h *BookCommandHandler) ProcessBook(topic string) error {
 	if err != nil {
 		if os.IsNotExist(err) {
 			bookState = state.NewState()
+			err = h.FileManager.SaveState(stateFilePath, bookState)
+			if err != nil {
+				return fmt.Errorf("failed to create state file: %v", err)
+			}
 		} else {
 			return fmt.Errorf("failed to load state: %v", err)
 		}
 	}
 
-	h.Logger.Info(fmt.Sprintf("Loaded state: %+v", bookState))
+	h.Logger.Debug(fmt.Sprintf("Loaded state: %+v", bookState))
 
 	// Check if the outline has already been generated
 	if !bookState.OutlineGenerated {
@@ -54,7 +64,7 @@ func (h *BookCommandHandler) ProcessBook(topic string) error {
 		if err != nil {
 			return err
 		}
-		h.Logger.Info(fmt.Sprintf("State after generating book outline: %+v", bookState))
+		h.Logger.Debug(fmt.Sprintf("State after generating book outline: %+v", bookState))
 		err = h.FileManager.SaveState(stateFilePath, bookState)
 		if err != nil {
 			return fmt.Errorf("failed to save state after outline generation: %w", err)
@@ -67,7 +77,7 @@ func (h *BookCommandHandler) ProcessBook(topic string) error {
 	if err != nil {
 		return err
 	}
-	h.Logger.Info(fmt.Sprintf("State after generating chapter outlines: %+v", bookState))
+	h.Logger.Debug(fmt.Sprintf("State after generating chapter outlines: %+v", bookState))
 	err = h.FileManager.SaveState(stateFilePath, bookState)
 	if err != nil {
 		return fmt.Errorf("failed to save state after chapter outlines generation: %w", err)
@@ -77,7 +87,7 @@ func (h *BookCommandHandler) ProcessBook(topic string) error {
 	if err != nil {
 		return err
 	}
-	h.Logger.Info(fmt.Sprintf("State after generating drafts: %+v", bookState))
+	h.Logger.Debug(fmt.Sprintf("State after generating drafts: %+v", bookState))
 	err = h.FileManager.SaveState(stateFilePath, bookState)
 	if err != nil {
 		return fmt.Errorf("failed to save state after drafts generation: %w", err)
@@ -100,15 +110,14 @@ func (h *BookCommandHandler) generateBookOutline(topic, bookPath string, bookSta
 		return h.handleError("failed to generate outline prompt", err)
 	}
 
-	bookState.MessageHistory = append(bookState.MessageHistory, state.Message{Role: "user", Content: prompt})
-	outlineContent, err := h.WritingAgent.SendMessage(&bookState.MessageHistory, h.FileManager, false)
+	outlineContent, err := h.WritingAgent.SendMessage(prompt)
 	if err != nil {
 		if !h.ErrorHandler.HandleError(h.handleError("failed to generate book outline", err)) {
 			return fmt.Errorf("retry attempts exhausted")
 		}
 	}
 
-	h.Logger.Info(fmt.Sprintf("Generated outline content:\n%s", outlineContent))
+	h.Logger.Debug(fmt.Sprintf("Generated outline content:\n%s", outlineContent))
 
 	var outline struct {
 		Title    string               `yaml:"title"`
@@ -152,15 +161,14 @@ func (h *BookCommandHandler) generateChapterOutlines(bookPath string, bookState 
 			return h.handleError("failed to generate chapter outline prompt", err)
 		}
 
-		bookState.MessageHistory = append(bookState.MessageHistory, state.Message{Role: "user", Content: prompt})
-		chapterOutlineContent, err := h.WritingAgent.SendMessage(&bookState.MessageHistory, h.FileManager, false)
+		chapterOutlineContent, err := h.WritingAgent.SendMessage(prompt)
 		if err != nil {
 			if !h.ErrorHandler.HandleError(h.handleError("failed to generate chapter outline", err)) {
 				return fmt.Errorf("retry attempts exhausted")
 			}
 		}
 
-		h.Logger.Info(fmt.Sprintf("Generated chapter outline content:\n%s", chapterOutlineContent))
+		h.Logger.Debug(fmt.Sprintf("Generated chapter outline content:\n%s", chapterOutlineContent))
 
 		var chapterOutline state.ChapterState
 
@@ -211,8 +219,7 @@ func (h *BookCommandHandler) generateDrafts(bookPath string, bookState *state.St
 				return h.handleError("failed to generate section content prompt", err)
 			}
 
-			bookState.MessageHistory = append(bookState.MessageHistory, state.Message{Role: "user", Content: prompt})
-			content, err := h.WritingAgent.SendMessage(&bookState.MessageHistory, h.FileManager, true)
+			content, err := h.WritingAgent.SendMessage(prompt)
 			if err != nil {
 				if !h.ErrorHandler.HandleError(h.handleError("failed to generate section content", err)) {
 					return fmt.Errorf("retry attempts exhausted")

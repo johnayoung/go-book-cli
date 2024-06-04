@@ -8,11 +8,9 @@ import (
 	"go-book-ai/internal/handlers"
 	"go-book-ai/internal/logger"
 	"go-book-ai/internal/models"
-	"go-book-ai/internal/state"
 	"go-book-ai/internal/utils"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -38,29 +36,6 @@ If a book with the given topic already exists, the command will pick up where it
 		errorHandler := errors.NewErrorHandler(3)
 		fileManager := file.NewFileManager()
 
-		// Create the book directory if it does not exist
-		bookPath := filepath.Join("books", cleanedTopic)
-		err := os.MkdirAll(bookPath, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Failed to create book directory: %v", err)
-		}
-
-		stateFilePath := filepath.Join(bookPath, "state.yaml")
-
-		// Load or create state
-		bookState, err := fileManager.LoadState(stateFilePath)
-		if err != nil {
-			if os.IsNotExist(err) {
-				bookState = state.NewState()
-				err = fileManager.SaveState(stateFilePath, bookState)
-				if err != nil {
-					log.Fatalf("Failed to create state file: %v", err)
-				}
-			} else {
-				log.Fatalf("Failed to load state: %v", err)
-			}
-		}
-
 		// Initialize agents and handlers
 		chatGPTModel := models.NewChatGPTModel(errorHandler)
 		writingAgent := agents.NewWritingAgent(chatGPTModel)
@@ -69,17 +44,11 @@ If a book with the given topic already exists, the command will pick up where it
 		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler, logger)
 
 		log.Printf("Starting process for book with topic: %s", cleanedTopic)
-		err = bookHandler.ProcessBook(topic)
+		err := bookHandler.ProcessBook(cleanedTopic)
 		if err != nil {
 			log.Printf("Failed to process book: %v", err)
 			fmt.Fprintf(os.Stderr, "Failed to process book: %v\n", err)
 			os.Exit(1)
-		}
-
-		// Save the updated state
-		err = fileManager.SaveState(stateFilePath, bookState)
-		if err != nil {
-			log.Fatalf("Failed to save state: %v", err)
 		}
 	},
 }
