@@ -76,11 +76,20 @@ Please ensure the output is valid YAML and do not include any additional text or
 func (agent *writingAgent) GenerateSectionContent(section outline.Section) (string, error) {
 	subsectionsPrompt := ""
 	for _, subsection := range section.Subsections {
-		subsectionsPrompt += fmt.Sprintf("\n      - title: \"%s\"", subsection.Title)
+		subsectionsPrompt += fmt.Sprintf("\n- title: \"%s\"\n  description: \"[Detailed description of the subsection]\"", subsection.Title)
 	}
 
-	prompt := fmt.Sprintf(`Write detailed content for the section titled "%s". 
-Subsections:%s`, section.Title, subsectionsPrompt)
+	prompt := fmt.Sprintf(`You are writing a detailed section for a book. The section is titled "%s" and it contains the following subsections:
+%s
+
+Please write a comprehensive draft for this section in Markdown format. The content should include:
+
+1. An introduction that provides an overview of the section.
+2. Detailed explanations for each of the subsections listed, with clear and thorough descriptions.
+3. Practical examples or case studies where relevant.
+4. Conclusion that summarizes the key points covered in the section.
+
+Make sure the content is engaging, informative, and suitable for a book. Write in a clear and professional tone, and ensure the output is well-structured and coherent. Use markdown formatting including headings, subheadings, lists, code blocks, and other formatting features where appropriate.`, section.Title, subsectionsPrompt)
 
 	return prompt, nil
 }

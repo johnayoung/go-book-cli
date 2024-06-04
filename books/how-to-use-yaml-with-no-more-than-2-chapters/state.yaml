@@ -1,0 +1,157 @@
+outline_generated: true
+chapters:
+- title: 'Chapter 1: Introduction to YAML'
+  outline_generated: true
+  draft_generated: false
+  sections:
+  - title: Background of YAML
+    draft_generated: true
+    subsections:
+    - title: What is YAML?
+    - title: History of YAML
+  - title: Basics of YAML
+    draft_generated: true
+    subsections:
+    - title: YAML Syntax
+    - title: Elements in YAML
+  - title: YAML vs. Other Markup Languages
+    draft_generated: true
+    subsections:
+    - title: YAML vs. JSON
+    - title: YAML vs. XML
+  - title: Getting Started with YAML
+    draft_generated: true
+    subsections:
+    - title: Installing YAML
+    - title: Typical YAML Use Cases
+    - title: Writing Your First YAML File
+- title: 'Chapter 2: Advanced YAML Techniques'
+  outline_generated: true
+  draft_generated: false
+  sections:
+  - title: Multiple Documents in a Single YAML File
+    draft_generated: true
+    subsections:
+    - title: Document Separators
+    - title: Using Multiple Documents
+  - title: Mapping Between Values
+    draft_generated: true
+    subsections:
+    - title: Basic Mapping
+    - title: Nested Mapping
+  - title: Working with Sequences
+    draft_generated: true
+    subsections:
+    - title: Basic Sequences
+    - title: Nested Sequences
+  - title: Advanced Anchors and Aliases
+    draft_generated: true
+    subsections:
+    - title: Creating Anchors
+    - title: Using Aliases
+  - title: Implementing JSON in YAML
+    draft_generated: true
+    subsections:
+    - title: JSON Syntax in YAML
+    - title: JSON and YAML Data Types
+message_history:
+- role: assistant
+  content: "title: \"how-to-use-yaml-with-no-more-than-2-chapters\"\nchapters:\n  -
+    title: \"Chapter 1: Introduction to YAML\"\n    sections:\n      - title: \"Understanding
+    YAML\"\n      - title: \"YAML Syntax and Basic Rules\"\n      - title: \"YAML
+    DataTypes and Structures\"\n      - title: \"How to Write YAML Files\"\n      \n
+    \ - title: \"Chapter 2: Advanced YAML Techniques\"\n    sections:\n      - title:
+    \"YAML Anchors and Aliases\"\n      - title: \"Complex Data Structures in YAML\"\n
+    \     - title: \"Best Practices for Writing YAML\"\n      - title: \"Debugging
+    YAML Files\""
+- role: assistant
+  content: |
+    title: "Chapter 1: Introduction to YAML"
+    sections:
+      - title: "Background of YAML"
+        description: "This section discusses the inception, development, and the main uses of YAML"
+        subsections:
+          - title: "What is YAML?"
+            description: "This subsection defines YAML, discusses it as a data language, and overviews its application areas"
+          - title: "History of YAML"
+            description: "This subsection features the development and evolution of YAML since its inception"
+      - title: "Basics of YAML"
+        description: "This section explains the basic structure and components of YAML"
+        subsections:
+          - title: "YAML Syntax"
+            description: "This subsection elaborates on the general syntax rules for YAML"
+          - title: "Elements in YAML"
+            description: "This subsection describes types of elements utilized in YAML, such as lists, dictionaries, and scalars"
+      - title: "YAML vs. Other Markup Languages"
+        description: "This section compares YAML to other markup languages, showing its specific strengths and weaknesses"
+        subsections:
+          - title: "YAML vs. JSON"
+            description: "This subsection contrasts YAML and JSON, discussing the key differences and similarities between these two data languages"
+          - title: "YAML vs. XML"
+            description: "This subsection contrasts YAML and XML, focusing on respective main advantages and disadvantages"
+      - title: "Getting Started with YAML"
+        description: "This section provides a practical guide for beginners to start coding with YAML"
+        subsections:
+          - title: "Installing YAML"
+            description: "This subsection provides step-by-step guidelines for installing YAML"
+          - title: "Typical YAML Use Cases"
+            description: "This subsection presents typical solutions and situations where YAML is commonly used, such as configuration files, data serialization, etc."
+          - title: "Writing Your First YAML File"
+            description: "This subsection guides beginners through the process of writing their first YAML document"
+- role: assistant
+  content: |-
+    title: "Chapter 2: Advanced YAML Techniques"
+    sections:
+      - title: "Multiple Documents in a Single YAML File"
+        description: "An introduction to managing multiple documents within a single YAML file for organized data representation"
+        subsections:
+          - title: "Document Separators"
+            description: "Detailed explanation on how three hyphens '---' can be used to delineate documents within a YAML file"
+          - title: "Using Multiple Documents"
+            description: "Guide on effective practices for using multiple documents, their limitations and benefits"
+      - title: "Mapping Between Values"
+        description: "Understanding how association between scalar values can be achieved through mapping in YAML"
+        subsections:
+          - title: "Basic Mapping"
+            description: "Discussing the basic concept of mapping and its syntax"
+          - title: "Nested Mapping"
+            description: "Advanced techniques for creating complex structures using nested mapping"
+      - title: "Working with Sequences"
+        description: "Describing techniques on using sequences in YAML to create ordered series of nodes"
+        subsections:
+          - title: "Basic Sequences"
+            description: "Introduction to sequences represented as comma separated values"
+          - title: "Nested Sequences"
+            description: "Demonstrating how nested sequences can be used to present complex data"
+      - title: "Advanced Anchors and Aliases"
+        description: "A detailed exploration of advanced usage of anchors and aliases for creating shortcuts and reusability of code in YAML"
+        subsections:
+          - title: "Creating Anchors"
+            description: "Steps to create anchors in YAML to permit reuse of properties"
+          - title: "Using Aliases"
+            description: "How to reference anchored values efficiently using aliases"
+      - title: "Implementing JSON in YAML"
+        description: "How YAML supports JSON structures, enabling users to work with both languages"
+        subsections:
+          - title: "JSON Syntax in YAML"
+            description: "Exploring the option of using JSON syntax within YAML files"
+          - title: "JSON and YAML Data Types"
+            description: "Explaining the differences between the data types in JSON and YAML"
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch1/section1/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch1/section2/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch1/section3/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch1/section4/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section1/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section2/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section3/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section4/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section5/draft.md

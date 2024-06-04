@@ -41,6 +41,16 @@ func (fm *FileManager) SaveState(path string, state interface{}) error {
 func (fm *FileManager) LoadState(path string) (*state.State, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			// Create a new state if the file does not exist
+			log.Printf("DEBUG: State file %s does not exist, creating new state", path)
+			newState := state.NewState()
+			err := fm.SaveState(path, newState)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create state file: %w", err)
+			}
+			return newState, nil
+		}
 		return nil, fmt.Errorf("failed to read state file: %w", err)
 	}
 	var state state.State

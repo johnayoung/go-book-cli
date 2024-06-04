@@ -45,15 +45,7 @@ func (h *BookCommandHandler) ProcessBook(topic string) error {
 	// Load state
 	bookState, err := h.FileManager.LoadState(stateFilePath)
 	if err != nil {
-		if os.IsNotExist(err) {
-			bookState = state.NewState()
-			err = h.FileManager.SaveState(stateFilePath, bookState)
-			if err != nil {
-				return fmt.Errorf("failed to create state file: %v", err)
-			}
-		} else {
-			return fmt.Errorf("failed to load state: %v", err)
-		}
+		return fmt.Errorf("failed to load state: %v", err)
 	}
 
 	h.Logger.Debug(fmt.Sprintf("Loaded state: %+v", bookState))
@@ -181,7 +173,6 @@ func (h *BookCommandHandler) generateChapterOutlines(bookPath string, bookState 
 		bookState.Chapters[i].Sections = chapterOutline.Sections
 
 		for j := range bookState.Chapters[i].Sections {
-			bookState.Chapters[i].Sections[j].OutlineGenerated = false
 			bookState.Chapters[i].Sections[j].DraftGenerated = false
 		}
 
@@ -194,63 +185,59 @@ func (h *BookCommandHandler) generateChapterOutlines(bookPath string, bookState 
 
 func (h *BookCommandHandler) generateDrafts(bookPath string, bookState *state.State) error {
 	for i, chapterState := range bookState.Chapters {
-		if !chapterState.OutlineGenerated || chapterState.DraftGenerated {
-			continue
-		}
+		if chapterState.OutlineGenerated && !chapterState.DraftGenerated {
+			chapterPath := filepath.Join(bookPath, fmt.Sprintf("ch%d", i+1))
+			for j, section := range chapterState.Sections {
+				if !section.DraftGenerated {
+					h.Logger.Info(fmt.Sprintf("Generating draft for section: %s", section.Title))
+					subsections := make([]outline.Subsection, len(section.Subsections))
+					for k, subsection := range section.Subsections {
+						subsections[k] = outline.Subsection{Title: subsection.Title}
+					}
+					sectionContent := outline.Section{
+						Title:       section.Title,
+						Subsections: subsections,
+					}
 
-		chapterPath := filepath.Join(bookPath, fmt.Sprintf("ch%d", i+1))
-		for j, section := range chapterState.Sections {
-			if !section.OutlineGenerated || section.DraftGenerated {
-				continue
-			}
+					prompt, err := h.WritingAgent.GenerateSectionContent(sectionContent)
+					if err != nil {
+						return h.handleError("failed to generate section content prompt", err)
+					}
 
-			h.Logger.Info(fmt.Sprintf("Generating draft for section: %s", section.Title))
-			subsections := make([]outline.Subsection, len(section.Subsections))
-			for k, subsection := range section.Subsections {
-				subsections[k] = outline.Subsection{Title: subsection.Title}
-			}
-			sectionContent := outline.Section{
-				Title:       section.Title,
-				Subsections: subsections,
-			}
+					content, err := h.WritingAgent.SendMessage(prompt)
+					if err != nil {
+						if !h.ErrorHandler.HandleError(h.handleError("failed to generate section content", err)) {
+							return fmt.Errorf("retry attempts exhausted")
+						}
+					}
 
-			prompt, err := h.WritingAgent.GenerateSectionContent(sectionContent)
-			if err != nil {
-				return h.handleError("failed to generate section content prompt", err)
-			}
+					sectionPath := filepath.Join(chapterPath, fmt.Sprintf("section%d", j+1))
+					err = os.MkdirAll(sectionPath, os.ModePerm)
+					if err != nil {
+						return h.handleError("failed to create section directory", err)
+					}
 
-			content, err := h.WritingAgent.SendMessage(prompt)
-			if err != nil {
-				if !h.ErrorHandler.HandleError(h.handleError("failed to generate section content", err)) {
-					return fmt.Errorf("retry attempts exhausted")
+					err = h.FileManager.SaveSectionContent(content, filepath.Join(sectionPath, "draft.md"))
+					if err != nil {
+						return h.handleError("failed to save section content", err)
+					}
+
+					chapterState.Sections[j].DraftGenerated = true
+					err = h.FileManager.SaveState(filepath.Join(bookPath, "state.yaml"), bookState)
+					if err != nil {
+						return h.handleError("failed to save state", err)
+					}
+
+					// Add reference to saved content in the history
+					bookState.MessageHistory = append(bookState.MessageHistory, state.Message{Role: "assistant", Content: fmt.Sprintf("Content saved to %s", filepath.Join(sectionPath, "draft.md"))})
 				}
 			}
 
-			sectionPath := filepath.Join(chapterPath, fmt.Sprintf("section%d", j+1))
-			err = os.MkdirAll(sectionPath, os.ModePerm)
-			if err != nil {
-				return h.handleError("failed to create section directory", err)
-			}
-
-			err = h.FileManager.SaveSectionContent(content, filepath.Join(sectionPath, "draft.md"))
-			if err != nil {
-				return h.handleError("failed to save section content", err)
-			}
-
-			chapterState.Sections[j].DraftGenerated = true
-			err = h.FileManager.SaveState(filepath.Join(bookPath, "state.yaml"), bookState)
+			chapterState.DraftGenerated = true
+			err := h.FileManager.SaveState(filepath.Join(bookPath, "state.yaml"), bookState)
 			if err != nil {
 				return h.handleError("failed to save state", err)
 			}
-
-			// Add reference to saved content in the history
-			bookState.MessageHistory = append(bookState.MessageHistory, state.Message{Role: "assistant", Content: fmt.Sprintf("Content saved to %s", filepath.Join(sectionPath, "draft.md"))})
-		}
-
-		chapterState.DraftGenerated = true
-		err := h.FileManager.SaveState(filepath.Join(bookPath, "state.yaml"), bookState)
-		if err != nil {
-			return h.handleError("failed to save state", err)
 		}
 	}
 
