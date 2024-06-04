@@ -2,27 +2,29 @@ package file
 
 import (
 	"fmt"
+	"go-book-ai/internal/logger"
 	"go-book-ai/internal/state"
-	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
-type FileManager struct{}
+type FileManager struct {
+	Logger logger.Logger
+}
 
-func NewFileManager() *FileManager {
-	return &FileManager{}
+func NewFileManager(logger logger.Logger) *FileManager {
+	return &FileManager{Logger: logger}
 }
 
 func (fm *FileManager) SaveSectionContent(content string, path string) error {
-	log.Printf("DEBUG: Saving section content to %s", path) // Add debug logging
+	fm.Logger.Debug(fmt.Sprintf("Saving section content to %s", path))
 	err := os.WriteFile(path, []byte(content), 0644)
 	if err != nil {
-		log.Printf("DEBUG: Failed to save section content to %s: %v", path, err) // Add debug logging
+		fm.Logger.Debug(fmt.Sprintf("Failed to save section content to %s: %v", path, err))
 		return fmt.Errorf("failed to save section content: %w", err)
 	}
-	log.Printf("DEBUG: Successfully saved section content to %s", path) // Add debug logging
+	fm.Logger.Debug(fmt.Sprintf("Successfully saved section content to %s", path))
 	return nil
 }
 
@@ -43,7 +45,7 @@ func (fm *FileManager) LoadState(path string) (*state.State, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Create a new state if the file does not exist
-			log.Printf("DEBUG: State file %s does not exist, creating new state", path)
+			fm.Logger.Debug(fmt.Sprintf("State file %s does not exist, creating new state", path))
 			newState := state.NewState()
 			err := fm.SaveState(path, newState)
 			if err != nil {

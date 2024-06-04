@@ -34,13 +34,12 @@ If a book with the given topic already exists, the command will pick up where it
 		}
 
 		errorHandler := errors.NewErrorHandler(3)
-		fileManager := file.NewFileManager()
+		logger := logger.NewSimpleLogger()
+		fileManager := file.NewFileManager(logger)
 
-		// Initialize agents and handlers
 		chatGPTModel := models.NewChatGPTModel(errorHandler)
 		writingAgent := agents.NewWritingAgent(chatGPTModel)
 		reviewingAgent := agents.NewMockReviewingAgent()
-		logger := logger.NewSimpleLogger()
 		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler, logger)
 
 		log.Printf("Starting process for book with topic: %s", cleanedTopic)

@@ -155,3 +155,5 @@ message_history:
   content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section4/draft.md
 - role: assistant
   content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section5/draft.md
+- role: assistant
+  content: Content saved to books/how-to-use-yaml-with-no-more-than-2-chapters/ch2/section5/draft.md
