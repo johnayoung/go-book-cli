@@ -9,7 +9,6 @@ import (
 	"go-book-ai/internal/logger"
 	"go-book-ai/internal/models"
 	"go-book-ai/internal/utils"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -28,13 +27,13 @@ If a book with the given topic already exists, the command will pick up where it
 		cleanedTopic := utils.CleanName(topic)
 
 		apiKey := os.Getenv("OPENAI_API_KEY")
+		logger := logger.NewSimpleLogger()
 		if apiKey == "" {
-			fmt.Fprintf(os.Stderr, "API key not set. Please set the OPENAI_API_KEY environment variable.\n")
+			logger.Error("API key not set. Please set the OPENAI_API_KEY environment variable.")
 			os.Exit(1)
 		}
 
 		errorHandler := errors.NewErrorHandler(3)
-		logger := logger.NewSimpleLogger()
 		fileManager := file.NewFileManager(logger)
 
 		chatGPTModel := models.NewChatGPTModel(errorHandler)
@@ -42,11 +41,10 @@ If a book with the given topic already exists, the command will pick up where it
 		reviewingAgent := agents.NewMockReviewingAgent()
 		bookHandler := handlers.NewBookCommandHandler(writingAgent, reviewingAgent, fileManager, errorHandler, logger)
 
-		log.Printf("Starting process for book with topic: %s", cleanedTopic)
+		logger.Info(fmt.Sprintf("Starting process for book with topic: %s", cleanedTopic))
 		err := bookHandler.ProcessBook(cleanedTopic)
 		if err != nil {
-			log.Printf("Failed to process book: %v", err)
-			fmt.Fprintf(os.Stderr, "Failed to process book: %v\n", err)
+			logger.Error(fmt.Sprintf("Failed to process book: %v", err))
 			os.Exit(1)
 		}
 	},
